@@ -1,0 +1,197 @@
+================================================================================
+COURSE REGISTRATION SYSTEM - COMPLETE DEPLOYMENT GUIDE & RECAP
+================================================================================
+Project: Course Registration System (Spring Boot + MySQL + HTML/JS Frontend)
+Repository: https://github.com/kayal-del/CourseRegistrationSystem
+Date: November 19, 2026
+================================================================================
+
+TABLE OF CONTENTS:
+1. Overview & Cloud Architecture
+2. Step 1: Preparing & Pushing Project to GitHub
+3. Step 2: Setting Up Free Cloud MySQL Database (TiDB Cloud)
+4. Step 3: Making the Project Cloud-Ready (Code Adjustments)
+5. Step 4: Deploying on Render.com (Free Web Service)
+6. Step 5: Troubleshooting & Fixing Deployment Errors
+7. Summary of Key Files & Settings
+
+================================================================================
+1. OVERVIEW & CLOUD ARCHITECTURE
+================================================================================
+
+To run a full-stack Spring Boot web application with a live database 100% free,
+we used the following 3-tier cloud architecture:
+
+1. Code Hosting:
+   - Platform: GitHub
+   - Purpose: Stores project code, tracks versions, triggers automatic builds.
+
+2. Cloud Database:
+   - Platform: TiDB Cloud Serverless (MySQL Compatible)
+   - Cost: Free ($0/month forever, 5 GB storage, no credit card required)
+   - Purpose: Replaces local laptop MySQL (localhost:3306) with a 24/7 cloud DB.
+
+3. Cloud Application Server:
+   - Platform: Render.com
+   - Cost: Free ($0/month)
+   - Purpose: Automatically compiles code, runs Spring Boot, and serves the website.
+
+================================================================================
+2. STEP 1: PREPARING & PUSHING PROJECT TO GITHUB
+================================================================================
+
+WHAT YOU DID:
+- Created a new empty GitHub repository named "CourseRegistrationSystem".
+- Ran the terminal push command and authorized GitHub.
+
+WHY IT WAS DONE:
+- Code needed to be stored online so cloud platforms (Render) can access it.
+- Security: GitHub requires the account owner to explicitly authorize uploads.
+
+HOW IT WAS DONE:
+1. Created a clean ".gitignore" file at the project root to exclude unwanted
+   files like:
+   - target/ (compiled build folders)
+   - .idea/ and .vscode/ (editor settings)
+2. Created a "README.md" explaining the project structure and tech stack.
+3. Initialized Git:
+   git init
+   git branch -M main
+   git remote add origin https://github.com/kayal-del/CourseRegistrationSystem.git
+   git add .
+   git commit -m "Initial commit: Course Registration System"
+4. You ran in terminal:
+   git push -u origin main
+5. When Git Credential Manager popped up in your browser, you clicked "Sign In/Authorize".
+
+================================================================================
+3. STEP 2: SETTING UP FREE CLOUD MYSQL DATABASE (TiDB CLOUD)
+================================================================================
+
+WHAT YOU DID:
+- Signed up on TiDB Cloud and launched a free MySQL database.
+- Copied the username, password, and connection string.
+
+WHY IT WAS DONE:
+- Your local MySQL only runs on your laptop. A website on the internet cannot
+  connect to your laptop's localhost. TiDB Cloud provides a 24/7 online MySQL DB.
+
+HOW IT WAS DONE:
+1. Visited https://tidbcloud.com/ and signed in with GitHub/Google.
+2. Clicked the "Create Resource" button.
+3. Selected "TiDB Serverless" / "Starter" plan ($0 / month).
+4. Clicked "Create".
+5. In the "Connect to Cluster0" popup, retrieved the connection details:
+   - Host: gateway01.ap-northeast-1.prod.aws.tidbcloud.com
+   - Port: 4000
+   - Username: cRYfvuWEgevuBis.root
+   - Password: lEDeIq2b0BQpCsdo
+   - Database: test
+
+================================================================================
+4. STEP 3: MAKING THE PROJECT CLOUD-READY (CODE ADJUSTMENTS)
+================================================================================
+
+WHAT WAS CHANGED & WHY:
+
+1. Unified Frontend into Spring Boot:
+   - What: Copied frontend HTML/JS files into "backend/src/main/resources/static/".
+   - Why: Allows Spring Boot to serve both the web pages and the REST APIs
+     from the exact same domain. This avoids CORS errors and eliminates the need
+     to pay for or manage two separate hosting services.
+
+2. Dynamic API URLs (myscript.js & register.html):
+   - What: Updated fetch calls to automatically use:
+     - "http://localhost:8080" when running locally (Live Server on port 5500).
+     - Relative URLs ("/courses", "/courses/register") when deployed in cloud.
+   - Why: Code works seamlessly in both local development and live production
+     without needing manual edits.
+
+3. Cloud Port Binding (application.properties):
+   - What: Added "server.port=${PORT:8080}".
+   - Why: Render dynamically assigns its own port number at startup. This setting
+     ensures Spring Boot listens on whatever port Render gives it.
+
+4. Default Course Seeder (CourseRegistrationSystemApplication.java):
+   - What: Added CommandLineRunner to insert 3 starter courses:
+     - CS101: Java Essentials (John Doe, 6 weeks)
+     - CS102: Python for ML (Jane Smith, 8 weeks)
+     - CS103: Spring Boot (Alex Brown, 4 weeks)
+   - Why: So the course table is populated immediately upon first deployment
+     instead of showing an empty blank page.
+
+5. Multi-Stage Dockerfile:
+   - What: Created "Dockerfile" at project root with Java 21 and Maven.
+   - Why: Tells Render exactly how to build the jar and start the container
+     with 1-click.
+
+================================================================================
+5. STEP 4: DEPLOYING ON RENDER.COM
+================================================================================
+
+WHAT YOU DID:
+- Created a free Web Service on Render and linked your GitHub repo.
+
+WHY IT WAS DONE:
+- Render provides the free cloud server that executes your code and makes
+  your web app accessible to anyone worldwide.
+
+HOW IT WAS DONE:
+1. Logged into https://dashboard.render.com/ with GitHub.
+2. Clicked "New +" -> "Web Service".
+3. Selected the repository "CourseRegistrationSystem".
+4. Selected the "Free" instance plan ($0/month).
+5. Clicked "Deploy Web Service".
+
+================================================================================
+6. STEP 5: TROUBLESHOOTING & FIXING DEPLOYMENT ERRORS
+================================================================================
+
+ERROR 1: Hibernate Dialect Failure
+- Log Error: "Unable to determine Dialect without JDBC metadata"
+- Reason: Hibernate tried to guess which SQL language to use before the cloud
+  SSL handshake completed.
+- Fix: Explicitly set in application.properties:
+  spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+  spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+ERROR 2: Database Access Denied (Typo in Credentials)
+- Log Error: "Access denied. Please check your user name and password."
+- Reason: When reading text from screenshots, certain characters look identical:
+  - The first letter of the password was a lowercase "l" (L), not the digit "1".
+  - The username had uppercase "WE" ("cRYfvuWEgevuBis.root").
+- Fix:
+  - You pasted the exact text from the TiDB Cloud console.
+  - We verified the credentials directly using a Python script (100% success).
+  - Updated application.properties with the verified username, password, and
+    "sslMode=REQUIRED".
+  - Pushed commit to GitHub. Render automatically redeployed.
+
+================================================================================
+7. FINAL APPLICATION CONFIGURATION (application.properties)
+================================================================================
+
+spring.application.name=CourseRegistrationSystem
+
+# Dynamic Port assigned by cloud host
+server.port=${PORT:8080}
+
+# Cloud MySQL Database (TiDB Cloud Serverless)
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:mysql://gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/test?sslMode=REQUIRED}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME:cRYfvuWEgevuBis.root}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:lEDeIq2b0BQpCsdo}
+
+# JPA / Hibernate Configuration
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+
+# Connection Pool Settings
+spring.datasource.hikari.connection-timeout=30000
+spring.datasource.hikari.maximum-pool-size=5
+
+================================================================================
+END OF DOCUMENT
+================================================================================
