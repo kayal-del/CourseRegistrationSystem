@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@CrossOrigin(origins = "http://127.0.0.1:5500")
+@CrossOrigin(origins = "*")
 @RestController
 public class CourseController {
     @Autowired
@@ -29,7 +29,7 @@ public class CourseController {
             @RequestParam String emailId,
             @RequestParam String courseName) {
         service.enrolledCourse(name, emailId, courseName);
-        return "Congratulations!" + name + "Enrollement Succesfull for " + courseName;
+        return "Congratulations!" + name + " Enrollement Succesfull for " + courseName;
     }
 
 }

@@ -1,35 +1,40 @@
+const API_BASE = (window.location.port === "5500" || window.location.protocol === "file:") 
+    ? "http://localhost:8080" 
+    : "";
+
 function showCourses(){
-    fetch("http://localhost:8080/courses") //API End point - this method make the connection in frontend and backend
+    fetch(`${API_BASE}/courses`) // API Endpoint
     .then((response) => response.json())
     .then((courses) => {
-        const dataTable = document.getElementById("coursetable")
+        const dataTable = document.getElementById("coursetable");
+        dataTable.innerHTML = "";
         courses.forEach(course => {
             var row = `<tr>
             <td>${course.courseId}</td>
             <td>${course.courseName}</td>
             <td>${course.trainer}</td>
             <td>${course.durationInWeeks}</td>
-            </tr>`
+            </tr>`;
 
-            dataTable.innerHTML+=row;
+            dataTable.innerHTML += row;
         });
     });
 }
 
 function showEnrolledStudents(){
-    fetch("http://localhost:8080/courses/enrolled") //API End point
-    .then((response) => response.json()) //Http response into json object
+    fetch(`${API_BASE}/courses/enrolled`) // API Endpoint
+    .then((response) => response.json())
     .then((students) => {
-        const dataTable = document.getElementById("enrolledtable")
-
+        const dataTable = document.getElementById("enrolledtable");
+        dataTable.innerHTML = "";
         students.forEach(student => {
             var row = `<tr>
             <td>${student.name}</td>
             <td>${student.emailId}</td>
             <td>${student.courseName}</td>
-            </tr>`
+            </tr>`;
 
-            dataTable.innerHTML+=row;
+            dataTable.innerHTML += row;
         });
     });
 }

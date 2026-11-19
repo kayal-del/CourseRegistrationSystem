@@ -38,7 +38,12 @@
     <body>
         <h1 style="color: yellow;">Kickstart with an exciting course</h1>
 
-        <form action="http://localhost:8080/courses/register" method="post"><!-- this the url of a backend.this is a post request and through this we can send a form data to a backend and make the data to store in db -->
+        <form id="regForm" action="/courses/register" method="post">
+            <script>
+                if (window.location.port === "5500" || window.location.protocol === "file:") {
+                    document.getElementById("regForm").action = "http://localhost:8080/courses/register";
+                }
+            </script>
             <label for="name">Enter your name:</label><br>
             <input type="text" name="name"><br><br>
 
