@@ -1,0 +1,28 @@
+# IDE & Editor files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.settings/
+.project
+.classpath
+
+# Build outputs
+target/
+**/target/
+build/
+**/build/
+bin/
+*.class
+
+# Maven wrapper jar
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs and temp files
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
